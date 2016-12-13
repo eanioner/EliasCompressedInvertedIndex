@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fmInvIndex));
             this.lbConnectionString = new System.Windows.Forms.Label();
             this.tbConnectionString = new System.Windows.Forms.TextBox();
             this.btnBuildIndex = new System.Windows.Forms.Button();
@@ -37,7 +38,9 @@
             this.tbProgressDisplay = new System.Windows.Forms.TextBox();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.btnClose = new System.Windows.Forms.Button();
+            this.pbLoading = new System.Windows.Forms.PictureBox();
             this.pnBuildAndSaveIndex.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbLoading)).BeginInit();
             this.SuspendLayout();
             // 
             // lbConnectionString
@@ -122,11 +125,24 @@
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // pbLoading
+            // 
+            this.pbLoading.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pbLoading.Image = ((System.Drawing.Image)(resources.GetObject("pbLoading.Image")));
+            this.pbLoading.Location = new System.Drawing.Point(15, 179);
+            this.pbLoading.Name = "pbLoading";
+            this.pbLoading.Size = new System.Drawing.Size(48, 29);
+            this.pbLoading.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbLoading.TabIndex = 8;
+            this.pbLoading.TabStop = false;
+            this.pbLoading.Visible = false;
+            // 
             // fmInvIndex
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(580, 211);
+            this.Controls.Add(this.pbLoading);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.tbProgressDisplay);
             this.Controls.Add(this.pnBuildAndSaveIndex);
@@ -137,9 +153,9 @@
             this.Name = "fmInvIndex";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Инвертированный индекс";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.fmInvIndex_FormClosing);
             this.Load += new System.EventHandler(this.fmInvIndex_Load);
             this.pnBuildAndSaveIndex.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pbLoading)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -156,6 +172,7 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.Button btnSaveInvertedIndexToFileUsingCompression;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.PictureBox pbLoading;
     }
 }
 

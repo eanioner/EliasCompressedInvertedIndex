@@ -32,6 +32,10 @@
             this.lbConnectionString = new System.Windows.Forms.Label();
             this.lbQuery = new System.Windows.Forms.Label();
             this.pnConnectionString = new System.Windows.Forms.Panel();
+            this.lblDocFound = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lblTimeElapsed = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.pnQuery = new System.Windows.Forms.Panel();
             this.btnChooseFile = new System.Windows.Forms.Button();
             this.btnSearch = new System.Windows.Forms.Button();
@@ -56,7 +60,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbConnectionString.Location = new System.Drawing.Point(15, 30);
             this.tbConnectionString.Name = "tbConnectionString";
-            this.tbConnectionString.Size = new System.Drawing.Size(571, 20);
+            this.tbConnectionString.Size = new System.Drawing.Size(514, 20);
             this.tbConnectionString.TabIndex = 3;
             this.tbConnectionString.Text = "Data Source=EANI;Initial Catalog=CrawlerDB;Integrated Security=True";
             // 
@@ -80,6 +84,10 @@
             // 
             // pnConnectionString
             // 
+            this.pnConnectionString.Controls.Add(this.lblDocFound);
+            this.pnConnectionString.Controls.Add(this.label3);
+            this.pnConnectionString.Controls.Add(this.lblTimeElapsed);
+            this.pnConnectionString.Controls.Add(this.label2);
             this.pnConnectionString.Controls.Add(this.lbConnectionString);
             this.pnConnectionString.Controls.Add(this.tbConnectionString);
             this.pnConnectionString.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -87,6 +95,42 @@
             this.pnConnectionString.Name = "pnConnectionString";
             this.pnConnectionString.Size = new System.Drawing.Size(803, 66);
             this.pnConnectionString.TabIndex = 5;
+            // 
+            // lblDocFound
+            // 
+            this.lblDocFound.AutoSize = true;
+            this.lblDocFound.Location = new System.Drawing.Point(671, 14);
+            this.lblDocFound.Name = "lblDocFound";
+            this.lblDocFound.Size = new System.Drawing.Size(10, 13);
+            this.lblDocFound.TabIndex = 2;
+            this.lblDocFound.Text = "-";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(557, 14);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(120, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Найдено документов: ";
+            // 
+            // lblTimeElapsed
+            // 
+            this.lblTimeElapsed.AutoSize = true;
+            this.lblTimeElapsed.Location = new System.Drawing.Point(671, 33);
+            this.lblTimeElapsed.Name = "lblTimeElapsed";
+            this.lblTimeElapsed.Size = new System.Drawing.Size(10, 13);
+            this.lblTimeElapsed.TabIndex = 2;
+            this.lblTimeElapsed.Text = "-";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(557, 33);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(82, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Время поиска:";
             // 
             // pnQuery
             // 
@@ -220,6 +264,7 @@
             this.MaximumSize = new System.Drawing.Size(819, 376);
             this.MinimumSize = new System.Drawing.Size(819, 376);
             this.Name = "fmSearchEngine";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SearchEngine";
             this.pnConnectionString.ResumeLayout(false);
             this.pnConnectionString.PerformLayout();
@@ -249,5 +294,9 @@
         private System.Windows.Forms.Label lblQueryForII;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.DataGridView dgv;
+        private System.Windows.Forms.Label lblDocFound;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblTimeElapsed;
+        private System.Windows.Forms.Label label2;
     }
 }

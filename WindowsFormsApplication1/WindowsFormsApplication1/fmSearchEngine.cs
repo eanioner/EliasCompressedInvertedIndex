@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections;
 using Coding;
+using System.Diagnostics;
 
 namespace InvertedIndex
 {
@@ -25,6 +26,8 @@ namespace InvertedIndex
             InitializeComponent();
 
             FileIsChosen += OnFileIsChosen;
+            SearchBegin += OnSearchBegin;
+            SearchEnd += OnSearchEnd;
 
 
             if (Connection != null) Connection.Close();
@@ -50,6 +53,9 @@ namespace InvertedIndex
 
         event EventHandler FileIsChosen;
 
+        event EventHandler SearchBegin;
+        event EventHandler SearchEnd;
+
         #endregion
 
         #region Event Handlers
@@ -60,10 +66,30 @@ namespace InvertedIndex
             btnSearch.Enabled = true;
         }
 
+
+        Stopwatch sw = new Stopwatch();
+        private void OnSearchBegin(object sender, EventArgs e)
+        {
+            lblDocFound.Text = "...";
+            lblTimeElapsed.Text = "...";
+
+            sw.Reset();
+            sw.Start();
+        }
+        private void OnSearchEnd(object sender, EventArgs e)
+        {
+            lblDocFound.Text = dgv.RowCount.ToString();
+
+            lblTimeElapsed.Text = sw.ElapsedMilliseconds.ToString() + " ms";
+        }
+
         #endregion
 
+        
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            SearchBegin(this, new EventArgs());
+
             string QueryText = tbQuery.Text;
             QueryText = fmInvIndex.ClearText(QueryText);
             RussianStemmer RStemmer = new RussianStemmer();            
@@ -80,52 +106,15 @@ namespace InvertedIndex
                 return;
             }
 
-            Dictionary<string, string> word2index = new Dictionary<string, string>();
-
-            int currentIndexOnWordInQuery = 0;
-            string queryWord = queryWords[currentIndexOnWordInQuery];
-
-
-            using (StreamReader sr = new StreamReader(openFileDialog.FileName))
-            {
-                while (sr.Peek() >= 0)
-                {
-                    string readline = sr.ReadLine();
-                    int indexOfColon = readline.IndexOf(':');
-                    if (indexOfColon < 0) continue;
-
-                    string word = readline.Substring(0, indexOfColon);
-                    
-
-                    if (word == queryWord)
-                    {
-                        word2index[word] = readline;
-                        currentIndexOnWordInQuery++;
-
-                        if (currentIndexOnWordInQuery < queryWords.Count)
-                            queryWord = queryWords[currentIndexOnWordInQuery];
-                        else
-                            break;
-
-                        continue;
-                    }
-                    else if (String.Compare(word, queryWord) > 0)
-                    {
-                        MessageBox.Show("Слово '" + queryWord + "' отсутствует в индексе. ");
-                        return;
-                    } 
-                }
-            }
-
 
             List<int> resultIDs = new List<int>();
             if (openFileDialog.SafeFileName.Split('.').Last() == "ii")
             {
-                resultIDs = SearchInSimpleInvertedIndex(word2index);
+                resultIDs = SearchInSimpleInvertedIndex(queryWords);
             }
             else
             {
-                resultIDs = SearchInCompressedInvertedIndex(word2index);
+                resultIDs = SearchInCompressedInvertedIndex(queryWords);
             }
 
             if (resultIDs == null || resultIDs.Count == 0)
@@ -147,10 +136,50 @@ namespace InvertedIndex
             dgv.DataSource = new DataView(dt);
             pnResponses.Controls.Add(dgv);
 
+            SearchEnd(this, new EventArgs());
         }
 
-        private List<int> SearchInSimpleInvertedIndex(Dictionary<string, string> term2terminfo)
+        private List<int> SearchInSimpleInvertedIndex(List<string> queryWords)
         {
+
+            Dictionary<string, string> term2terminfo = new Dictionary<string, string>();
+
+            int currentIndexOnWordInQuery = 0;
+            string queryWord = queryWords[currentIndexOnWordInQuery];
+
+
+            using (StreamReader sr = new StreamReader(openFileDialog.FileName))
+            {
+                while (sr.Peek() >= 0)
+                {
+                    string readline = sr.ReadLine();
+                    int indexOfColon = readline.IndexOf(':');
+                    if (indexOfColon < 0) continue;
+
+                    string word = readline.Substring(0, indexOfColon);
+
+
+                    if (word == queryWord)
+                    {
+                        term2terminfo[word] = readline;
+                        currentIndexOnWordInQuery++;
+
+                        if (currentIndexOnWordInQuery < queryWords.Count)
+                            queryWord = queryWords[currentIndexOnWordInQuery];
+                        else
+                            break;
+
+                        continue;
+                    }
+                    else if (String.Compare(word, queryWord) > 0)
+                    {
+                        MessageBox.Show("Слово '" + queryWord + "' отсутствует в индексе. ");
+                        return null;
+                    }
+                }
+            }
+
+
 
             List<List<int>> lst = 
             term2terminfo.Values.ToList()
@@ -182,20 +211,109 @@ namespace InvertedIndex
             return result_set;
             
         }
-        private List<int> SearchInCompressedInvertedIndex(Dictionary<string, string> term2terminfo) 
+        private List<int> SearchInCompressedInvertedIndex(List<string> queryWords) 
         {
-            
-            List<string> lst = term2terminfo.Values.ToList()
-                .Select(s => s.Substring(s.IndexOf(':') + 1)).ToList();
+            Dictionary<string, byte[]> term2terminfo = new Dictionary<string, byte[]>();
 
+            int currentIndexOnWordInQuery = 0;
+            string queryWord = queryWords[currentIndexOnWordInQuery];
+
+            #region ReadFromFile
+            using (FileStream fs = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read)) {
+
+                
+                List<byte> Term = new List<byte>();
+                string term = "";
+                List<byte> Num = new List<byte>();
+                int num = 0;
+                List<byte> Code = new List<byte>();
+
+                int numBytesToRead = (int)fs.Length;
+                int numBytesRead = 0;
+
+                int nColon = 0;
+                while (numBytesToRead > 0)
+                {
+
+                    byte b = (byte)fs.ReadByte();
+                    numBytesToRead--;
+                    char ch = Convert.ToChar(b);
+
+                    if (nColon == 0) {
+                        if (ch == ':') {
+
+                            nColon = 1;
+                            term = Encoding.UTF8.GetString(Term.ToArray());
+                            Term.Clear();
+
+                        } else {
+                            Term.Add(b);
+                        }
+                    }
+                    else if (nColon == 1) {
+                        if (ch == ':')
+                        {
+                            nColon = 2;
+                            string snum = Encoding.UTF8.GetString(Num.ToArray());
+                            if (!int.TryParse(snum, out num)) {
+                                MessageBox.Show("Индекс поврежден");
+                                return null; 
+                            }
+                            Num.Clear();
+                        } else {
+                            Num.Add(b);
+                        }
+                    } else {
+                        Code.Add(b);
+
+                        if (Code.Count == num)
+                        {
+                            nColon = 0;
+
+
+                            if (term == queryWord)
+                            {
+                                term2terminfo[term] = Code.ToArray();
+                                Code.Clear();
+                                currentIndexOnWordInQuery++;
+
+                                if (currentIndexOnWordInQuery < queryWords.Count)
+                                    queryWord = queryWords[currentIndexOnWordInQuery];
+                                else
+                                    break;
+
+                                
+                            }
+                            else if (String.Compare(term, queryWord) > 0)
+                            {
+                                MessageBox.Show("Слово '" + queryWord + "' отсутствует в индексе. ");
+                                return null;
+                            }
+
+                            Code.Clear();
+                        }
+
+                    }
+                }
+
+
+            }
+            #endregion
+
+
+
+
+            //List<string> lst = new List<string>(); // term2terminfo.Values.ToList()
+                //.Select(s => s.Substring(s.IndexOf(':') + 2)).ToList();
+
+            List<byte[]> lst = term2terminfo.Values.ToList();
             
             List<int> result_set = new List<int>();
 
             GammaEliasCoding.BufferDecoder decoder;
             for (int i = 0; i < lst.Count; ++i) 
             {
-                string s = lst[i];
-                byte[] b = s.Select(ch => Convert.ToByte(ch)).ToArray();
+                byte[] b = lst[i];
                 decoder = new GammaEliasCoding.BufferDecoder(b);
 
                 List<int> inner_set = new List<int>();
@@ -217,11 +335,6 @@ namespace InvertedIndex
                     if (result_set.Count == 0) return result_set;
                 }
             }
-
-            
-             
-
-
 
             return result_set;
         }

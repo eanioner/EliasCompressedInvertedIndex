@@ -74,6 +74,7 @@
             this.MaximumSize = new System.Drawing.Size(497, 206);
             this.MinimumSize = new System.Drawing.Size(497, 206);
             this.Name = "fmMainWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MainWindow";
             this.ResumeLayout(false);
 

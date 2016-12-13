@@ -43,6 +43,30 @@ namespace InvertedIndex
             //return Index.Keys.Select(k => k.ToString() + ":" + Index[k].ToString()).Aggregate((l, r) => l + "\n" + r);
         }
 
+        public void SaveCompressedToFile(FileStream fs)
+        {
+            try
+            {
+                Index.Keys.ToList()
+                    .ForEach(k =>
+                    {
+                        Console.Write(k);
+
+                        Encoding.UTF8.GetBytes(k.ToString()).ToList().ForEach(b => fs.WriteByte(b));
+
+                        fs.WriteByte(Convert.ToByte(':'));
+
+                        Index[k].SaveCompressedToFile(fs);
+                    });
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine( ex.Message );
+                
+            }
+        }
+
         //public void SaveToFile(string FileName, IDisplayTextProgress displayProgress)
         //{
         //    File.WriteAllText(FileName, "");
@@ -124,6 +148,8 @@ namespace InvertedIndex
         string ToStringWithCompress();
 
         //void SaveToFile(string FileName);
+
+        void SaveCompressedToFile(FileStream fs);
     }
 
     #endregion
@@ -188,8 +214,12 @@ namespace InvertedIndex
 
         public override string ToString()
         {
-            
             return TermIndex.Keys.Select(k => "(" + k.ToString() + ":" + TermIndex[k].ToString() + ")").Aggregate((l, r) => l + "," + r);
+        }
+
+        public void SaveCompressedToFile(FileStream fs)
+        {
+
         }
 
         public string ToStringWithCompress()
@@ -235,6 +265,22 @@ namespace InvertedIndex
             //return TermIndex.Keys.Select(k => "(" + k.ToString() + "," + TermIndex[k].ToString() + ")").Aggregate((l, r) => l + "," + r);
         }
 
+        public void SaveCompressedToFile(FileStream fs)
+        {
+            GammaEliasCoding.BufferEncoder encoder = new GammaEliasCoding.BufferEncoder();
+
+            ForwardConversion(TermIndex.Keys.ToList()).ForEach(d => encoder.Append(d));
+            TermIndex.Values.ToList().ForEach(d => encoder.Append(d));
+
+            byte [] bytes = encoder.GetByteArray();
+
+            Encoding.UTF8.GetBytes(bytes.Length.ToString()).ToList().ForEach(ch => fs.WriteByte(Convert.ToByte(ch)));
+            
+            fs.WriteByte(Convert.ToByte(':'));
+
+            foreach (byte b in bytes) fs.WriteByte(b);
+        }
+
         //public void SaveToFile(string FileName)
         //{
         //    int counter = 0;
@@ -253,7 +299,10 @@ namespace InvertedIndex
             ForwardConversion(TermIndex.Keys.ToList()).ForEach(d => encoder.Append(d));
             TermIndex.Values.ToList().ForEach(d => encoder.Append(d));
 
-            string s = encoder.GetByteArray().ToList().Select(b => Convert.ToChar(b).ToString()).Aggregate((l, r) => l + r);
+            byte [] bytes = encoder.GetByteArray();
+            string s = bytes.ToList().Select(b => Convert.ToChar(b).ToString()).Aggregate((l, r) => l + r);
+
+            s = bytes.Length + ":" + s;
 
             return s;
         }

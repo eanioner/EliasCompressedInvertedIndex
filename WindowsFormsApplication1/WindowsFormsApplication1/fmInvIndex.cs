@@ -24,6 +24,9 @@ namespace InvertedIndex
         event EventHandler InvertedIndexBuildBegin;
         event EventHandler InvertedIndexHasBeenBuilt;
 
+        event EventHandler SavingBegin;
+        event EventHandler SavingEnd;
+
 
         public fmInvIndex()
         {
@@ -37,6 +40,11 @@ namespace InvertedIndex
 
             TextProgress = new DisplayTextProgressMergeToBegin();
             TextProgress.IsChanged += ProgressInfoIsChanged;
+
+            SavingBegin += OnSavingBegin;
+            SavingEnd += OnSavingEnd;
+
+            InitBackGrounWorkers();
         }
 
         private void btnBuildIndex_Click(object sender, EventArgs e)
@@ -88,7 +96,7 @@ namespace InvertedIndex
                     InvertedIndex.Add(term, doc.Id, position);
                 }
 
-                //if (counter > 1000) break;
+                if (counter > 1000) break;
             }
 
             TextProgress.AddInformation("Индекс построен.\r\n");
@@ -176,60 +184,141 @@ namespace InvertedIndex
             btnSaveInvertedIndexToFileUsingCompression.Enabled = true;
         }
 
+        private void OnSavingBegin(object sender, EventArgs e)
+        {
+            btnBuildIndex.Enabled = btnSaveInvertedIndexToFile.Enabled = btnSaveInvertedIndexToFileUsingCompression.Enabled
+                = false;
+        }
+
+        private void OnSavingEnd(object sender, EventArgs e){
+            btnBuildIndex.Enabled = btnSaveInvertedIndexToFile.Enabled = btnSaveInvertedIndexToFileUsingCompression.Enabled
+                = true;
+        }
         #endregion
 
         private void btnSaveInvertedIndexToFile_Click(object sender, EventArgs e)
         {
-            try
-            {
-                saveFileDialog.Title = "Save an Inverted Index";
+            
+            saveFileDialog.Title = "Save an Inverted Index";
 
-                saveFileDialog.FileName = "InvertedIndex";
-                saveFileDialog.DefaultExt = ".ii";
-                if (DialogResult.OK == saveFileDialog.ShowDialog())
-                {
-                    TextProgress.AddInformation("Сохранение инвертированного индекса...\r\n");
-                    File.WriteAllText(saveFileDialog.FileName, InvertedIndex.ToString());
-                    TextProgress.AddInformation("Инвертированный индекс сохранен\r\n");
-                }
-            }
-            catch (Exception ex)
+            saveFileDialog.FileName = "InvertedIndex";
+            saveFileDialog.DefaultExt = ".ii";
+            if (DialogResult.OK == saveFileDialog.ShowDialog())
             {
-                MessageBox.Show(ex.Message);
-            }
+                SavingBegin(null, null);
+                TextProgress.AddInformation("Сохранение инвертированного индекса...\r\n");
+                pbLoading.Visible = true;
+                bgwSaving.RunWorkerAsync(saveFileDialog.FileName);
+
+            }         
         }
 
         private void btnSaveInvertedIndexToFileUsingCompression_Click(object sender, EventArgs e)
         {
-            try
+
+            saveFileDialog.Title = "Save a Compressed Inverted Index";
+            saveFileDialog.FileName = "GammaEliasCompressedInvertedIndex";
+            saveFileDialog.DefaultExt = ".cii";
+
+            if (DialogResult.OK == saveFileDialog.ShowDialog())
             {
-                saveFileDialog.Title = "Save a Compressed Inverted Index";
-                saveFileDialog.FileName = "GammaEliasCompressedInvertedIndex";
-                saveFileDialog.DefaultExt = ".cii";
+                SavingBegin(null, null);
+                TextProgress.AddInformation("Сохранение сжатого инвертированного индекса...\r\n");
 
-                if (DialogResult.OK == saveFileDialog.ShowDialog())
-                {
-                    TextProgress.AddInformation("Сохранение сжатого инвертированного индекса...\r\n");
-
-                    File.WriteAllText(saveFileDialog.FileName, InvertedIndex.ToStringWithCompression());
-
-                    TextProgress.AddInformation("Сжатый инвертированный индекс сохранен\r\n");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+                pbLoading.Visible = true;
+                bgwCompressingSaving.RunWorkerAsync(saveFileDialog.FileName); 
+            }               
         }
 
-        private void fmInvIndex_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            //Connection.Close();
-        }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Close();
         }
+
+       
+        
+        
+        
+        private void Save(string FileName)
+        {
+            try
+            {
+                File.WriteAllText(FileName, InvertedIndex.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+
+
+
+        private void CompressingSave(string FileName)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(FileName, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    InvertedIndex.SaveCompressedToFile(fs);
+                }                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+        #region BGWorkers() 
+        BackgroundWorker bgwSaving;
+        private void bgwSaving_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string FileName = e.Argument.ToString();
+
+            Save(FileName);
+        }
+        private void bgwSaving_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            pbLoading.Visible = false;
+            TextProgress.AddInformation("Инвертированный индекс сохранен\r\n");
+
+            SavingEnd(null, null);
+        }
+        
+        
+        BackgroundWorker bgwCompressingSaving;
+        private void bgwCompressingSaving_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string FileName = e.Argument.ToString();
+
+            CompressingSave(FileName);
+        }
+        private void bgwCompressingSaving_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            pbLoading.Visible = false;
+            TextProgress.AddInformation("Сжатый инвертированный индекс сохранен\r\n");
+
+            SavingEnd(null, null);
+        }
+
+        private void InitBackGrounWorkers()
+        {
+            bgwSaving = new BackgroundWorker();
+            bgwSaving.DoWork += bgwSaving_DoWork;
+            bgwSaving.RunWorkerCompleted += bgwSaving_RunCompleted;
+
+            bgwCompressingSaving = new BackgroundWorker();
+            bgwCompressingSaving.DoWork += bgwCompressingSaving_DoWork;
+            bgwCompressingSaving.RunWorkerCompleted += bgwCompressingSaving_RunCompleted;
+        }
+
+
+        #endregion
+
+
+
     }
 }

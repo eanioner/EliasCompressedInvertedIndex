@@ -4,6 +4,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace InvertedIndex
 {
@@ -18,5 +19,6 @@ namespace InvertedIndex
         IEnumerator GetEnumerator();
 
         //void SaveToFile(string FileName, IDisplayTextProgress displayProgress);
+        void SaveCompressedToFile(FileStream fs);
     }
 }
