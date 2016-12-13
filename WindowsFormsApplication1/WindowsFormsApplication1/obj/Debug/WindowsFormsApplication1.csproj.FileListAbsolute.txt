@@ -1,0 +1,16 @@
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\InvertedIndex.fmInvIndex.resources
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\InvertedIndex.Properties.Resources.resources
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\ICSharpCode.SharpZipLib.dll
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Lucene.Net.dll
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\StemmersNet.dll
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Lucene.Net.pdb
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Lucene.Net.xml
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\InvertedIndex.fmMainWindow.resources
+D:\ROOT\Job\Freelance\InvertedIndexAndGammaElias\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\InvertedIndex.fmSearchEngine.resources
